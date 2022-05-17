@@ -16,7 +16,7 @@ try {
 
     const vertices = adjacency.map(item => item.split(' '))
 
-    const graph = new Graph(verticesAmount)
+    const graph = new Graph(+verticesAmount)
 
     vertices.map((vertice) => {
         graph.addEdge(...vertice);
@@ -26,6 +26,7 @@ try {
 
 } catch (err) {
     console.error('Erro ao ler o arquivo, verifique o arquivo e tente novamente');
+    console.error(err);
 }
 
 

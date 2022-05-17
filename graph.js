@@ -140,7 +140,7 @@ export class Graph {
     }
 
     getAdjacencyMatrix() {
-        const matrix = Array.from(Array(9), () => Array(9).fill(0));
+        const matrix = Array.from(Array(this.verticesNumber), () => Array(this.verticesNumber).fill(0));
 
         for (let i = 0; i < this.vertices.length; i++) {
 
