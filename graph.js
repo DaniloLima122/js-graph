@@ -1,7 +1,5 @@
 export class Graph {
 
-    edgeNumber = 0;
-
     constructor(verticesNumber = 0) {
         this.vertices = [];
         this.adjacentList = new Map();
@@ -41,13 +39,8 @@ export class Graph {
         }
 
 
-        if (!this.adjacentList.get(originVertex).find(item => item === targetVertex)) {
-            this.adjacentList.get(originVertex).push(targetVertex);
-        }
-
-        if (!this.adjacentList.get(targetVertex).find(item => item === originVertex)) {
-            this.adjacentList.get(targetVertex).push(originVertex);
-        }
+        this.adjacentList.get(originVertex).push(targetVertex);
+        this.adjacentList.get(targetVertex).push(originVertex);
     }
 
     countEdges() {
@@ -139,44 +132,73 @@ export class Graph {
         return s;
     }
 
-    getAdjacencyMatrix() {
-        const matrix = Array.from(Array(this.verticesNumber), () => Array(this.verticesNumber).fill(0));
+ 
+    bfs(node, destination = '') {
+        let visited = {};
 
-        for (let i = 0; i < this.vertices.length; i++) {
+        let q = [];
 
-            for (let j of this.adjacentList.get(this.vertices[i])) {
-                matrix[i][j] = 1;
+        visited[node] = true;
+        q.push(node);
+
+        let resultMessage = ``;
+
+        while (q.length > 0) {
+            var element = q.shift();
+
+            var adjList = this.adjacentList.get(element.toString());
+
+            for (var index in adjList) {
+                var item = adjList[index];
+                if (!visited[item]) {
+                    visited[item] = true;
+                    console.log('Vértice visitado: ', item)
+                    q.push(item);
+                }
+
+                if ((item == destination)) {
+                    resultMessage = `\nValor ${destination} encontrado`;
+                }
+            }
+
+        }
+        console.log(resultMessage)
+    }
+
+    dfs(v, visited) {
+        visited[v] = true;
+        process.stdout.write(v + " ");
+
+        const list = Object.fromEntries(this.adjacentList)
+
+        for (const key in list[v]) {
+            if (!visited[list[v][key.toString()]]) {
+                this.dfs(list[v][key.toString()], visited);
+            }
+        }
+    }
+
+    connectedComponents() {
+
+        const adjList = Object.fromEntries(this.adjacentList);
+
+        const visitedList = Object.fromEntries(this.adjacentList)
+
+        for (const key in visitedList) {
+            visitedList[key.toString()] = false;
+        }
+
+        let conexosQtd = 0;
+
+        for (const key in adjList) {
+            if (!visitedList[key.toString()]) {
+                process.stdout.write(`\n${conexosQtd + 1}º componente conexo -> `);
+                conexosQtd++;
+                this.dfs(key, visitedList);
             }
         }
 
-        return matrix;
+        console.log('\n\nQuantidade total de componentes conexos: ', conexosQtd)
     }
 
-    getRepresentationalAddjacencyMatrix() {
-
-        const adjacencyMatrix = this.getAdjacencyMatrix();
-
-        let colum = '  |  ';
-        let headerline = '-------'
-
-        this.vertices.map(v => {
-            colum += v + '    '
-            headerline += '----';
-        })
-        console.log(colum)
-        console.log(headerline)
-
-        for (let i = 0; i < this.verticesNumber; i++) {
-
-            let line = '';
-
-            for (let j = 0; j < this.verticesNumber; j++) {
-                let arr = adjacencyMatrix[i][j];
-
-                line += arr + '    ';
-
-            }
-            console.log(this.vertices[i] + ' |  ' + line)
-        }
-    }
 } 

@@ -1,13 +1,12 @@
 import fs from 'fs';
+import prompt from 'prompt';
 import { Graph } from './graph.js';
 
-console.log('\nPara criar um grafo adicione os dados no arquivo txt na raiz do projeto obedecendo a estrutura\n\n')
-
 // TODO Itens restantes a fazer
-// TODO 1 - Busca em largura
-// TODO 2 - Componentes conexos
+// TODO 3 - Interface de linha de comando pro usuario interagir
 
-try {
+
+const gerarGrafoDoArquivo = () => {
     const data = fs.readFileSync('./listaDeAdjacencia.txt', 'UTF-8');
 
     const lines = data.split(/\r?\n/);
@@ -16,50 +15,106 @@ try {
 
     const vertices = adjacency.map(item => item.split(' '))
 
-    const graph = new Graph(+verticesAmount)
+    const graph = new Graph(verticesAmount)
 
     vertices.map((vertice) => {
         graph.addEdge(...vertice);
     })
-    
-    graph.getRepresentationalAddjacencyMatrix()
 
-} catch (err) {
-    console.error('Erro ao ler o arquivo, verifique o arquivo e tente novamente');
-    console.error(err);
+    return graph;
+
 }
 
+try {
 
-// graph.addEdge('A', 'B');
-// graph.addEdge('A', 'C');
-// graph.addEdge('A', 'D');
-// graph.addEdge('C', 'D');
-// graph.addEdge('C', 'G');
-// graph.addEdge('D', 'G');
-// graph.addEdge('D', 'H');
-// graph.addEdge('B', 'E');
-// graph.addEdge('B', 'F');
-// graph.addEdge('E', 'I');
+    const graph = gerarGrafoDoArquivo();
 
-// graph.addEdge('1', '3');
-// graph.addEdge('2', '4');
-// graph.addEdge('2', '5');
-// graph.addEdge('3', '4');
-// graph.addEdge('3', '5');
-// graph.addEdge('4', '5');
-// graph.addEdge('4', '6');
-// graph.addEdge('5', '6');
-// graph.addEdge('0', '1');
-// graph.addEdge('0', '2');
-// graph.addEdge('0', '3');
-// graph.addEdge('0', '4');
-// graph.addEdge('2', '3');
-// console.log('Número de vértices: ' + graph.getTotalVertices());
-// console.log('Número de arestas: ' + graph.countEdges());
-// console.log('Grau máximo: ' + graph.getGrauMaximo());
-// console.log('Grau mínimo: ' + graph.getGrauMinimo());
-// console.log('Representação em matriz de adjacência ');
-// graph.getRepresentationalAddjacencyMatrix()
+    prompt.start();
 
-// console.log(graph.toString());
+    console.log('\x1b[32m', '\n-- Grafo gerado com sucesso a partir do arquivo, o que deseja fazer? --\n')
+
+    const actions = [
+        {
+            label: 'A',
+            desc: 'Mostrar número de vértices',
+            fn: () => console.log('Número de vértices: ' + graph.getTotalVertices())
+        },
+        {
+            label: 'B',
+            desc: 'Mostrar número de arestas',
+            fn: () => console.log('Número de arestas: ' + graph.countEdges())
+        },
+        {
+            label: 'C',
+            desc: 'Grau mínimo do grafo',
+            fn: () => console.log('Grau mínimo: ' + graph.getGrauMinimo())
+        },
+        {
+            label: 'D',
+            desc: 'Grau máximo do grafo',
+            fn: () => console.log('Grau máximo: ' + graph.getGrauMaximo())
+        },
+        {
+            label: 'F',
+            desc: 'Mostrar saída para busca em largura',
+            fn: (node, dest) => graph.bfs(node, dest)
+        },
+        {
+            label: 'G',
+            desc: 'Buscar por componentes conexas',
+            fn: () => graph.connectedComponents()
+        },
+    ]
+
+    console.log('\x1b[37m', '-- Para escolher, digite a letra de uma das opções abaixo --\n')
+
+    actions.forEach(action => {
+        console.log('\x1b[37m', `${action.label}. ${action.desc}`);
+    })
+    console.log('\n-----------------------------\n')
+
+    prompt.get(['action'], (err, result) => {
+
+        if (err === '') return;
+
+        if (result.action.length === 0) {
+            console.log('\x1b[33m', '\nInforme uma opção válida')
+            return;
+        }
+
+        const optionIsValid = actions.some(action => action.label.toLowerCase() === result.action.toLowerCase());
+
+        if (!optionIsValid) {
+            console.error('\x1b[31m', 'Opção inválida')
+            return;
+        };
+
+        const option = actions.find(act => act.label.toLowerCase() === result.action.toLowerCase());
+
+        console.log(`\nOpção escolhida: ${option.desc} \n`)
+
+        if (option.label.toLowerCase() === 'f') {
+            console.log('\n-- Informe o vértice de partida, o valor procurado é opcional --\n')
+
+            prompt.get([
+                { name: 'Valor inicial', required: true },
+                { name: 'Valor procurado', required: false }
+            ], (err, result) => {
+                if (err) return;
+
+
+                option.fn(result['Valor inicial'], result['Valor procurado'])
+            })
+
+            return;
+        }
+        
+
+        option.fn()
+
+    })
+
+} catch {
+    console.error('\x1b[31m', 'Algo de errado não está certo!');
+}
 
